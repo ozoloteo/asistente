@@ -8,6 +8,7 @@ import subprocess
 import ctypes
 import time
 import pyautogui
+import pygatt
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -75,16 +76,16 @@ def playMusic():
     url = f"https://music.youtube.com/search?q={query}"
     webbrowser.open(url)
 
-    time.sleep(5)  # Espera 5 segundos para asegurarte de que la página esté cargada
+    time.sleep(8)  # Espera 8 segundos para asegurarte de que la página esté cargada
 
     # Ubicación del botón de reproducción en la pantalla (ajusta estos valores según tu pantalla)
-    play_button_x = 870
-    play_button_y = 362
+    play_button_x = 963
+    play_button_y = 399
 
     pyautogui.click(play_button_x, play_button_y)  # Simula el clic en el botón de reproducción
 
 def googleSearch(query):
-    query = query.replace("búscame en google", "")
+    query = query.replace("", "")
     webbrowser.open(f"https://www.google.com/search?q={query}")
 
 def shutdownComputer():
@@ -130,16 +131,41 @@ def turn_on_wifi():
         speak("Cancelando.")
 
 def turn_off_bluetooth():
-    subprocess.run(["cmd", "/c", "net stop bthserv"])
-    time.sleep(2)
-    subprocess.run(["cmd", "/c", "net start bthserv"])
-    speak("Bluetooth apagado y encendido.")
+    adapter = pygatt.GATTToolBackend()
+    try:
+        adapter.start()
+        devices = adapter.scan(run_as_root=True)
+        for device in devices:
+            adapter.connect(device)
+            print(f"Apagando Bluetooth para el dispositivo {device['address']}")
+            adapter.disconnect(device)
+        speak("Bluetooth apagado.")
+    except Exception as e:
+        print(f"Error al apagar Bluetooth: {str(e)}")
+        speak("No se pudo apagar Bluetooth.")
+    finally:
+        try:
+            adapter.stop()
+        except Exception as e:
+            print(f"Error al detener el adaptador Bluetooth: {str(e)}")
 
-def turn_on_bluetooth():
-    subprocess.run(["cmd", "/c", "net stop bthserv"])
-    time.sleep(2)
-    subprocess.run(["cmd", "/c", "net start bthserv"])
-    speak("Bluetooth encendido y apagado.")
+    # Continuar escuchando comandos
+    listen_for_commands()
+
+def listen_for_commands():
+    while True:
+        try:
+            query = takeCommand().lower()
+
+            if query == "coco":
+                print("Diga coco para activar el asistente.")
+                break
+
+            # Resto de las funciones aquí
+
+        except KeyboardInterrupt:
+            print("Diga coco para activar el asistente.")
+            break
 
 def find_file():
     speak("¿Qué archivo desea buscar?")
@@ -158,10 +184,10 @@ def find_file():
     speak("Lo siento, no pude encontrar el archivo.")
 
 if __name__ == "__main__":
-    print("Presione 's' o 'f' para activar el asistente.")
+    print("diga coco para activar el asistente.")
     activate_assistant = False
     while not activate_assistant:
-        activate_assistant = takeCommand().lower() in ["s", "f"]
+        activate_assistant = takeCommand().lower() in ["COCO", "coco"]
 
     wishMe()
 
@@ -169,8 +195,8 @@ if __name__ == "__main__":
         try:
             query = takeCommand().lower()
 
-            if query == "f":
-                print("Presione 's' o 'f' para activar el asistente.")
+            if query == "coco":
+                print("diga coco para activar el asistente.")
                 break
 
             if "calculadora" in query or "calcular" in query:
@@ -224,5 +250,5 @@ if __name__ == "__main__":
                 activate_assistant = takeCommand().lower() in ["s", "f"]
 
         except KeyboardInterrupt:
-            print("Presione 's' o 'f' para activar el asistente.")
+            print("diga coco para activar el asistente.")
             break
