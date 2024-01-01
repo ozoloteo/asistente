@@ -7,4 +7,4 @@ Este es un asistente hecho en Python que puede realizar las siguiente funciones 
 "pip install pyttsx3 datetime SpeechRecognition wikipedia webbrowser pyautogui pygatt"
 
 **ACTIVACION**
-Se debe de decir la palabra clave "coco" posteriormente el comando que sea ejecutar.
+Se debe de decir la palabra clave "coco" posteriormente el comando que desea ejecutar.
